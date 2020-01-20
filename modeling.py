@@ -8,15 +8,15 @@ import numpy as np
 
 class TransformerConfig(object) :
 	def __init__(self,
-				vocab_size_src,
-				vocab_size_trg,
-				max_seq_num_src,
-				max_seq_num_trg,
-				hidden_size,
-				embedding_size,
-				num_block_enc,
-				num_block_dec,
-				num_head) :
+			vocab_size_src,
+			vocab_size_trg,
+			max_seq_num_src,
+			max_seq_num_trg,
+			hidden_size,
+			embedding_size,
+			num_block_enc,
+			num_block_dec,
+			num_head) :
 
 		self.vocab_size_src = vocab_size_src
 		self.vocab_size_trg = vocab_size_trg
@@ -61,17 +61,17 @@ class TransformerModel(object) :
 
 				with tf.variable_scope("layer_%d" % layer_idx) :
 					context = self.multi_head_attention_layer(batch_size=batch_size,
-													q_tensor=next_input,
-													kv_tensor=next_input,
-													d_model=config.embedding_size,
-													n_head=config.num_head,
-													attn_mask=attn_mask_enc)
+							q_tensor=next_input,
+							kv_tensor=next_input,
+							d_model=config.embedding_size,
+							n_head=config.num_head,
+							attn_mask=attn_mask_enc)
 					sub1 = self.add_and_norm_layer(next_input, context)
 
 					sub2 = self.positionwise_FF(batch_size=batch_size,
-										input_ff=sub1,
-										hidden_size=config.hidden_layer,
-										d_model=config.embedding_size)
+							input_ff=sub1,
+							hidden_size=config.hidden_layer,
+							d_model=config.embedding_size)
 
 					next_input = self.add_and_norm_layer(sub1, sub2)
 
@@ -85,28 +85,28 @@ class TransformerModel(object) :
 
 				with tf.variable_scope("self_layer_%d" % layer_idx) :
 					context = self.multi_head_attention_layer(batch_size=batch_size,
-													q_tensor=next_input,
-													kv_tensor=next_input,
-													d_model=config.embedding_size,
-													n_head=config.num_head,
-													attn_mask=attn_mask_dec)
+							q_tensor=next_input,
+							kv_tensor=next_input,
+							d_model=config.embedding_size,
+							n_head=config.num_head,
+							attn_mask=attn_mask_dec)
 					sub1 = self.add_and_norm_layer(next_input, context)
 
 				with tf.variable_scope("connect_layer_%d" % layer_idx) :
 					# Connect Encoder_output to decoder
 					context = self.multi_head_attention_layer(batch_size=batch_size,
-													q_tensor=sub1,
-													kv_tensor=self.encoder_output,
-													d_model=config.embedding_size,
-													n_head=config.num_head,
-													attn_mask=attn_mask_enc_dec)
+							q_tensor=sub1,
+							kv_tensor=self.encoder_output,
+							d_model=config.embedding_size,
+							n_head=config.num_head,
+							attn_mask=attn_mask_enc_dec)
 
 					sub2 = self.add_and_norm_layer(sub1, context)
 
 					sub3 = self.positionwise_FF(batch_size=batch_size,
-										input_ff=sub2,
-										hidden_size=config.hidden_layer,
-										d_model=config.embedding_size)
+							input_ff=sub2,
+							hidden_size=config.hidden_layer,
+							d_model=config.embedding_size)
 
 					next_input = self.add_and_norm_layer(sub2, sub3)
 

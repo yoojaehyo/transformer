@@ -105,23 +105,23 @@ flags.DEFINE_integer(
 def model_fn(features, labels, mode, params) : 
 
 	config = modeling.TransformerConfig(
-				vocab_size_src=FLAGS.src_vocab_size,
-				vocab_size_trg=FLAGS.trg_vocab_size,
-				max_seq_num_src=FLAGS.src_max_length,
-				max_seq_num_trg=FLAGS.trg_max_length,
-				hidden_size=FLAGS.hidden_size,
-				embedding_size=FLAGS.d_model,
-				num_block_enc=FLAGS.n_block_enc,
-				num_block_dec=FLAGS.n_block_dec,
-				num_head=FLAGS.n_head)
+			vocab_size_src=FLAGS.src_vocab_size,
+			vocab_size_trg=FLAGS.trg_vocab_size,
+			max_seq_num_src=FLAGS.src_max_length,
+			max_seq_num_trg=FLAGS.trg_max_length,
+			hidden_size=FLAGS.hidden_size,
+			embedding_size=FLAGS.d_model,
+			num_block_enc=FLAGS.n_block_enc,
+			num_block_dec=FLAGS.n_block_dec,
+			num_head=FLAGS.n_head)
 
 	model = modeling.TransformerModel(
-				batch_size=params['batch_size'],
-				config=config,
-				input_src_id=features['enc_input_id'],
-				input_trg_id=features['dec_input_id'],
-				mask_src=features['enc_input_mask'],
-				mask_trg=features['dec_input_mask'])
+			batch_size=params['batch_size'],
+			config=config,
+			input_src_id=features['enc_input_id'],
+			input_trg_id=features['dec_input_id'],
+			mask_src=features['enc_input_mask'],
+			mask_trg=features['dec_input_mask'])
 
 	decoder_output = model.get_decoder_output()
 
@@ -129,10 +129,10 @@ def model_fn(features, labels, mode, params) :
 	with tf.variable_scope("output_layer") :
 		# [N, seq_len, vocab_size]
 		output_linear = tf.layers.dense(
-				tf.reshape(decoder_output, [-1, config.embedding_size]),
-				config.embedding_size,
-				activation=tf.nn.relu,
-				name="output_linear")
+			tf.reshape(decoder_output, [-1, config.embedding_size]),
+			config.embedding_size,
+			activation=tf.nn.relu,
+			name="output_linear")
 
 		embedding_table_trg = model.get_embedding_table_trg()
 
@@ -164,22 +164,22 @@ def model_fn(features, labels, mode, params) :
 		global_step_f = tf.cast(global_step, tf.float32)
 
 		learning_rate = tf.math.pow(tf.cast(config.embedding_size, tf.float32), -0.5)
-							* tf.math.minimum(tf.math.pow(global_step_f, -0.5),
-								global_step_f * tf.math.minimum(FLAGS.warmup_steps, -1.5))
+						* tf.math.minimum(tf.math.pow(global_step_f, -0.5),
+							global_step_f * tf.math.minimum(FLAGS.warmup_steps, -1.5))
 
 		optimizer = tf.train.AdamOptimizer(
-					learning_rate=learning_rate,
-					beta_1=0.9,
-					beta_2=0.98,
-					epsilon=1e-09)
+			learning_rate=learning_rate,
+			beta_1=0.9,
+			beta_2=0.98,
+			epsilon=1e-09)
 
 		train_op = optimizer.minimize(loss, global_step=global_step)
 
 		output_spec = tf.estimator.EstimatorSpec(
-					mode=mode,
-					loss=loss,
-					train_op=train_op)
-		
+			mode=mode,
+			loss=loss,
+			train_op=train_op)
+
 	elif mode == tf.estimator.ModeKeys.PREDICT :
 		predicted_labels = tf.argmax(logits, axis=-1)
 
@@ -189,8 +189,8 @@ def model_fn(features, labels, mode, params) :
 		}
 
 		output_spec = tf.estimator.EstimatorSpec(
-					mode=mode,
-					predictions=predictions)
+			mode=mode,
+			predictions=predictions)
 
 	else :
 		raise ValueError("Only Train or Predict modes are supported: %s" % (mode))
@@ -243,8 +243,8 @@ def main(_) :
 	tf.gfile.MakeDirs(FLAGS.output_dir)
  
 	run_config = tf.estimator.RunConfig(
-			model_dir=FLAGS.output_dir,
-			save_checkpoints_steps=FLAGS.save_checkpoints_steps)
+		model_dir=FLAGS.output_dir,
+		save_checkpoints_steps=FLAGS.save_checkpoints_steps)
 
 
 
